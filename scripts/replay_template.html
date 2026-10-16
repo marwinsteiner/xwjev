@@ -1,0 +1,174 @@
+<title>Thursday Solve Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  /* Layout: one centred column; the grid replay is the hero, data tables below it. Graphite ink on cool paper, pencil-amber for uncertainty, rose for errors. */
+  :root {
+    --bg: #f6f7f9; --paper: #ffffff; --fg: #17191d; --muted: #5d6470; --rule: #d6dae2;
+    --ink: #1f4e9c; --ink-soft: #e4ebf7; --amber: #f3dc9a; --amber-soft: #fbf1cf; --rose: #c9303e; --rose-soft: #fadada;
+    --black-cell: #202227; --good: #2d7a4f;
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif; --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #15171b; --paper: #1d2026; --fg: #eceef2; --muted: #a1a8b4; --rule: #343942;
+    --ink: #7fa6e8; --ink-soft: #243556; --amber: #a98a2c; --amber-soft: #3a3320; --rose: #f08a94; --rose-soft: #4a2227;
+    --black-cell: #0a0b0d; --good: #6cc496; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #15171b; --paper: #1d2026; --fg: #eceef2; --muted: #a1a8b4; --rule: #343942;
+    --ink: #7fa6e8; --ink-soft: #243556; --amber: #a98a2c; --amber-soft: #3a3320; --rose: #f08a94; --rose-soft: #4a2227;
+    --black-cell: #0a0b0d; --good: #6cc496; color-scheme: dark; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--body); line-height: 1.5; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+  main { max-width: 980px; margin: 0 auto; display: grid; gap: 28px; }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem, 4vw, 2.5rem); line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 700; font-size: 1.15rem; margin: 0 0 10px; }
+  p { margin: 0; max-width: 68ch; }
+  .eyebrow { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .lede { color: var(--muted); max-width: 70ch; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .stat { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; }
+  .stat .v { font-family: var(--display); font-weight: 700; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+  .stat .k { color: var(--muted); font-size: 0.85rem; }
+  .replay { background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: grid; gap: 12px; }
+  .replay-head { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; justify-content: space-between; }
+  .stage { font-family: var(--mono); font-weight: 600; font-size: 0.95rem; min-width: 0; }
+  .meter { font-family: var(--mono); color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  canvas { width: 100%; max-width: 600px; height: auto; display: block; margin: 0 auto; border-radius: 4px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { font: 600 0.9rem var(--body); background: var(--ink); color: #fff; border: 0; border-radius: 6px; padding: 8px 16px; cursor: pointer; }
+  button.secondary { background: var(--ink-soft); color: var(--ink); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  input[type="range"] { flex: 1 1 200px; min-width: 0; accent-color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem; color: var(--muted); }
+  .sw { display: inline-block; width: 14px; height: 14px; border: 1px solid var(--rule); vertical-align: -2px; margin-right: 5px; border-radius: 2px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .two > * { min-width: 0; }
+  .gifwrap { background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: grid; gap: 10px; }
+  .gifwrap img { width: 100%; max-width: 600px; margin: 0 auto; display: block; border-radius: 4px; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-family: var(--mono); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  td.w { font-family: var(--mono); font-weight: 600; }
+  td.w.bad { color: var(--rose); }
+  td.w.ok { color: var(--good); }
+  .note { background: var(--amber-soft); border-left: 4px solid var(--amber); padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 0.92rem; max-width: none; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<main>
+  <header>
+    <div class="eyebrow">xwjev · retrieval + belief propagation · 2026-10-15</div>
+    <h1>The solver fills the Thursday NYT grid, sweep by sweep</h1>
+    <p class="lede">__LEDE__</p>
+  </header>
+
+  <section class="stats" aria-label="Result summary">__STATS__</section>
+
+  <section class="replay" aria-label="Interactive replay">
+    <div class="replay-head">
+      <div class="stage" id="stage">start</div>
+      <div class="meter" id="meter"></div>
+    </div>
+    <canvas id="grid" width="600" height="600" aria-label="Crossword grid being filled"></canvas>
+    <div class="controls">
+      <button id="play" type="button">Pause</button>
+      <button id="restart" type="button" class="secondary">Restart</button>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="Frame">
+      <span class="meter" id="frameno"></span>
+    </div>
+    <div class="legend">
+      <span><span class="sw" style="background: var(--amber-soft)"></span>uncertain cell (max letter marginal below 1)</span>
+      <span><span class="sw" style="background: var(--rose-soft)"></span>wrong in the final grid</span>
+      <span>letter darkness tracks confidence from the crossings</span>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="gifwrap">
+      <h2>Animated GIF</h2>
+      <img src="solve.gif" alt="Animated GIF of the crossword grid filling in over the solver stages">
+      <p class="meter">Same frames as the replay above, as a shareable file (solve.gif).</p>
+    </section>
+    <section class="gifwrap">
+      <h2>Stages and timing</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>stage</th><th>t (s)</th><th>letters right</th></tr></thead>
+        <tbody>__STAGES__</tbody>
+      </table></div>
+    </section>
+  </div>
+
+  <section class="gifwrap">
+    <h2>What it got wrong</h2>
+    <p class="note">__THEME__</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>slot</th><th>clue</th><th>solver</th><th>answer</th></tr></thead>
+      <tbody>__MISSES__</tbody>
+    </table></div>
+  </section>
+
+  <section class="gifwrap">
+    <h2>How to read this run</h2>
+    <p>__HOW__</p>
+  </section>
+</main>
+<script>
+const DATA = __FRAMES__;
+(function () {
+  const frames = DATA.frames, W = DATA.width, H = DATA.height, black = DATA.black, sol = DATA.solution, numbers = DATA.numbers;
+  const cv = document.getElementById('grid'), ctx = cv.getContext('2d');
+  const stageEl = document.getElementById('stage'), meterEl = document.getElementById('meter'), scrub = document.getElementById('scrub'), frameno = document.getElementById('frameno');
+  const playBtn = document.getElementById('play'), restartBtn = document.getElementById('restart');
+  const cell = Math.floor(600 / Math.max(W, H));
+  cv.width = cell * W; cv.height = cell * H;
+  scrub.max = String(frames.length - 1);
+  function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function draw(i) {
+    const fr = frames[i], final = i === frames.length - 1;
+    const colFg = tok('--fg'), colPaper = tok('--paper'), colRule = tok('--rule'), colBlack = tok('--black-cell'), colAmber = tok('--amber-soft'), colRose = tok('--rose-soft'), colRoseFg = tok('--rose'), colMuted = tok('--muted');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+      const x = c * cell, y = r * cell;
+      if (black[r][c]) { ctx.fillStyle = colBlack; ctx.fillRect(x, y, cell, cell); continue; }
+      const letter = fr.grid[r][c], conf = fr.conf[r][c];
+      const wrong = final && sol && letter && letter !== sol[r][c];
+      ctx.fillStyle = wrong ? colRose : (letter && conf < 0.97 ? colAmber : colPaper);
+      ctx.fillRect(x, y, cell, cell);
+      ctx.strokeStyle = colRule; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1);
+      const n = numbers[r + ',' + c];
+      if (n) { ctx.fillStyle = colMuted; ctx.font = '500 ' + Math.round(cell * 0.26) + 'px ' + tok('--mono'); ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(String(n), x + 3, y + 2); }
+      if (letter) {
+        const a = Math.max(0.25, Math.min(1, (conf - 0.15) / 0.85));
+        ctx.globalAlpha = wrong ? 1 : a;
+        ctx.fillStyle = wrong ? colRoseFg : colFg;
+        ctx.font = '600 ' + Math.round(cell * 0.6) + 'px ' + tok('--mono'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(letter, x + cell / 2, y + cell / 2 + cell * 0.08);
+        ctx.globalAlpha = 1;
+      }
+    }
+    stageEl.textContent = fr.stage;
+    const acc = fr.acc || {};
+    meterEl.textContent = 't = ' + fr.t.toFixed(2) + ' s' + (acc.letters ? '   letters ' + acc.letters_ok + '/' + acc.letters : '');
+    frameno.textContent = (i + 1) + ' / ' + frames.length;
+    scrub.value = String(i);
+  }
+  let i = 0, timer = null;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function step() {
+    draw(i);
+    const d = DATA.durations[i] || 150;
+    i = i + 1;
+    if (i >= frames.length) { i = frames.length - 1; stop(); return; }
+    timer = setTimeout(step, d);
+  }
+  function stop() { if (timer) clearTimeout(timer); timer = null; playBtn.textContent = 'Play'; }
+  function start() { if (i >= frames.length - 1) i = 0; playBtn.textContent = 'Pause'; step(); }
+  playBtn.addEventListener('click', () => timer ? stop() : start());
+  restartBtn.addEventListener('click', () => { stop(); i = 0; start(); });
+  scrub.addEventListener('input', () => { stop(); i = parseInt(scrub.value, 10); draw(i); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw(Math.min(i, frames.length - 1)));
+  new MutationObserver(() => draw(Math.min(i, frames.length - 1))).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  draw(0);
+  if (reduced) { i = frames.length - 1; draw(i); playBtn.textContent = 'Play'; } else { start(); }
+})();
+</script>

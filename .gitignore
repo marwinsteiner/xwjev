@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.egg-info/
+assets/
+puzzles/
+runs/
+*.log
+.jev_cache/
+data/
+.pytest_cache/
+*.dict
+*.puz
+*.xd
